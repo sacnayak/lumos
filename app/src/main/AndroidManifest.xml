@@ -37,6 +37,11 @@
                 <category android:name="edu.cmu.ssnayak.lumos" />
             </intent-filter>
         </receiver>
+        <!-- The location service -->
+        <service
+            android:name=".service.LocationService"
+            android:label="LocationService" >
+        </service>
     </application>
 
     <!--Location user permission for maps-->

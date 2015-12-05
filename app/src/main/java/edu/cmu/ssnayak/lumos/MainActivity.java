@@ -1,5 +1,6 @@
 package edu.cmu.ssnayak.lumos;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.cmu.ssnayak.lumos.client.GcmUtil;
+import edu.cmu.ssnayak.lumos.service.LocationService;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
 
         gcmUtil = new GcmUtil(getApplicationContext());
+
+        //Start service
+        startService(new Intent(this, LocationService.class));
     }
 
     private void setupViewPager(ViewPager viewPager) {
