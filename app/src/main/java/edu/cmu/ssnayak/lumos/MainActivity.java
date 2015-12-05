@@ -14,11 +14,15 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.cmu.ssnayak.lumos.client.GcmUtil;
+
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+
+    private GcmUtil gcmUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+
+        gcmUtil = new GcmUtil(getApplicationContext());
     }
 
     private void setupViewPager(ViewPager viewPager) {

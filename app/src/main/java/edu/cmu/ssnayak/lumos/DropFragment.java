@@ -3,7 +3,9 @@ package edu.cmu.ssnayak.lumos;
 
 import android.Manifest;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -11,11 +13,13 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,6 +32,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -45,8 +50,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.cmu.ssnayak.lumos.client.Constants;
+import edu.cmu.ssnayak.lumos.client.ServerUtilities;
+import edu.cmu.ssnayak.lumos.data.DataProvider;
 
 /**
  * Created by snayak on 12/1/15.
@@ -62,19 +72,46 @@ public class DropFragment extends Fragment implements LocationListener {
     private Button sendMessageButton;
     private Marker dropMarker;
 
-    public static final String PUBLIC_API_KEY = "AIzaSyCPlxkR74t3eAwL0bL8HLDQM4qARZXH-2w";
+
 
     private View.OnClickListener sendMessage = new View.OnClickListener() {
         public void onClick(View view) {
             Button btn = (Button) view;
-            TextView tv = (TextView) getView().findViewById(R.id.send_button);
-            //TODO:sending message logic
-            //TODO:clear the text fields
+            TextView tv = (TextView) getView().findViewById(R.id.message);
+
             String receiver = ((EditText) getView().findViewById(R.id.receiver)).getText().toString();
             String message = ((EditText) getView().findViewById(R.id.message)).getText().toString();
 
+            //Grab the selected location from the map
+
+            Location location = googleMap.getMyLocation();
+            String latitude = String.valueOf(location.getLatitude());
+            String longitude = String.valueOf(location.getLongitude());
             Log.d("Receiver: ", receiver);
-            Log.d("Message: ", message);
+            Log.d("Sending Message:", message);
+            Log.d("Tagged at Latitude: ", latitude);
+            Log.d("Tagged at Longitude: ", longitude);
+            //send the message to server -> GCM
+            send(tv.getText().toString(), receiver, latitude, longitude);
+
+            ((EditText) getView().findViewById(R.id.receiver)).setText(null);
+            ((EditText) getView().findViewById(R.id.message)).setText(null);
+
+            Cursor c = getActivity().getContentResolver().query(DataProvider.CONTENT_URI_MESSAGES, null, null, null, null);
+            while(c.moveToNext()) {
+                Log.d("Iterating over: ", "Messages from DB");
+                Log.d("From: ", " " + c.getString(c.getColumnIndex(DataProvider.COL_FROM)));
+                Log.d("To: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_TO)));
+                Log.d("Msg: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_MSG)));
+                Log.d("Lat: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_LAT)));
+                Log.d("Long: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_LONG)));
+                if(Commons.getPreferredEmail()==c.getString(c.getColumnIndex(DataProvider.COL_FROM))) {
+                    Log.d("Message from DB:", " " +c.getString(c.getColumnIndex(DataProvider.COL_MSG)));
+                }
+                c.move(1);
+            }
+
+
         }
     };
 
@@ -85,6 +122,20 @@ public class DropFragment extends Fragment implements LocationListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Cursor c = getActivity().getContentResolver().query(DataProvider.CONTENT_URI_MESSAGES, null, null, null, null);
+        while(c.moveToNext()) {
+            Log.d("Iterating over: ", "Messages from DB");
+            Log.d("From: ", " " + c.getString(c.getColumnIndex(DataProvider.COL_FROM)));
+            Log.d("To: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_TO)));
+            Log.d("Msg: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_MSG)));
+            Log.d("Lat: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_LAT)));
+            Log.d("Long: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_LONG)));
+            if(Commons.getPreferredEmail()==c.getString(c.getColumnIndex(DataProvider.COL_FROM))) {
+                Log.d("Message from DB:", " " +c.getString(c.getColumnIndex(DataProvider.COL_MSG)));
+            }
+            c.move(1);
+        }
+
     }
 
     @Override
@@ -227,7 +278,7 @@ public class DropFragment extends Fragment implements LocationListener {
         }
         StringBuilder urlBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/autocomplete/json?input=")
                 .append(Uri.encode(inputQuery))
-                .append("&key=" + PUBLIC_API_KEY)
+                .append("&key=" + Constants.PUBLIC_API_KEY)
                 .append("&location=")
                 .append(googleMap.getMyLocation().getLatitude() + "," + googleMap.getMyLocation().getLongitude());
 
@@ -279,6 +330,40 @@ public class DropFragment extends Fragment implements LocationListener {
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
     }
+
+    private void send(final String txt, final String profileEmail, final String lat, final String llong) {
+        Log.d("Message sent is: " , txt);
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String msg = "";
+                try {
+                    ServerUtilities.send(txt, profileEmail, lat, llong);
+
+                    ContentValues values = new ContentValues(4);
+                    values.put(DataProvider.COL_MSG, txt);
+                    values.put(DataProvider.COL_TO, profileEmail);
+                    values.put(DataProvider.COL_FROM, Commons.getPreferredEmail());
+                    values.put(DataProvider.COL_LAT, lat);
+                    values.put(DataProvider.COL_LONG, llong);
+
+                    getActivity().getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
+
+                } catch (IOException ex) {
+                    msg = "Message could not be sent";
+                }
+                return msg;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+                if (!TextUtils.isEmpty(msg)) {
+                    Toast.makeText(getActivity().getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                }
+            }
+        }.execute(null, null, null);
+    }
+
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
