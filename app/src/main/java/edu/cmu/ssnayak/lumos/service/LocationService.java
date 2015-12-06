@@ -1,7 +1,11 @@
 package edu.cmu.ssnayak.lumos.service;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.database.Cursor;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -20,6 +24,10 @@ import com.google.android.gms.location.LocationServices;
 import java.text.DateFormat;
 import java.util.Date;
 
+import edu.cmu.ssnayak.lumos.MainActivity;
+import edu.cmu.ssnayak.lumos.R;
+import edu.cmu.ssnayak.lumos.data.DataProvider;
+
 
 /**
  * Created by snayak on 12/5/15.
@@ -31,6 +39,7 @@ public class LocationService extends Service implements LocationListener,
     private static final String TAG = "****LocationService****";
     private static final long INTERVAL = 1000 * 10;
     private static final long FASTEST_INTERVAL = 1000 * 5;
+    private static final float ACCURACY = 25;
 
     LocationRequest mLocationRequest;
     GoogleApiClient mGoogleApiClient;
@@ -107,7 +116,62 @@ public class LocationService extends Service implements LocationListener,
         mCurrentLocation = location;
         Log.d(TAG, String.valueOf(mCurrentLocation.getLatitude()));
         Log.d(TAG, String.valueOf(mCurrentLocation.getLongitude()));
+
+        isNotify(mCurrentLocation);
+
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+    }
+
+    private boolean isNotify(Location currentLocation) {
+        Cursor c = getContentResolver().query(DataProvider.CONTENT_URI_MESSAGES, null, null, null, null);
+        while(c.moveToNext()) {
+            //check if messages table has messages which are unread
+            if(c.getInt(c.getColumnIndex(DataProvider.COL_READ)) == 0 && inVicinity(c)) {
+                publishMessage(c);
+            }
+            c.move(1);
+        }
+        return false;
+    }
+
+    private boolean inVicinity(Cursor cursor) {
+        if(mCurrentLocation == null) {return false;}
+        double messageLatitude = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DataProvider.COL_LAT)));
+        double messageLongitude = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DataProvider.COL_LONG)));
+
+        Location location = new Location("MessageLocation");
+        location.setLatitude(messageLatitude);
+        location.setLongitude(messageLongitude);
+
+        float distance = mCurrentLocation.distanceTo(location);
+        if(distance < ACCURACY) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void publishMessage(Cursor cursor) {
+        // prepare intent which is triggered if the
+        // notification is selected
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        // build notification
+        // the addAction re-use the same intent to keep the example short
+        Notification notification  = new Notification.Builder(this)
+                .setContentTitle(cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM)))
+                .setContentText(cursor.getString(cursor.getColumnIndex(DataProvider.COL_MSG)))
+                .setSmallIcon(R.drawable.ic_plusone_standard_off_client)
+                .setContentIntent(pIntent)
+                .setAutoCancel(true)
+                .build();
+
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        notificationManager.notify(0, notification);
     }
 
     protected void stopLocationUpdates() {

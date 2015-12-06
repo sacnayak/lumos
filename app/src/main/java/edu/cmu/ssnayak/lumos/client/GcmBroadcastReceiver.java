@@ -55,11 +55,12 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
                 Log.d("lat", lat);
                 Log.d("long", llong);
 
-                ContentValues values = new ContentValues(4);
+                ContentValues values = new ContentValues(5);
 				values.put(DataProvider.COL_MSG, msg);
 				values.put(DataProvider.COL_FROM, email);
                 values.put(DataProvider.COL_LAT, lat);
                 values.put(DataProvider.COL_LONG, llong);
+                values.put(DataProvider.COL_READ, 0);//default unread
 
 				context.getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
 				

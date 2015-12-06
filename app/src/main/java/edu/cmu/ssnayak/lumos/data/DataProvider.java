@@ -29,6 +29,7 @@ public class DataProvider extends ContentProvider {
     public static final String COL_TO = "email2";
     public static final String COL_LAT = "lat";
     public static final String COL_LONG = "long";
+    public static final String COL_READ = "read";
 
 
     public static final String TABLE_PROFILE = "profile";
@@ -197,7 +198,7 @@ public class DataProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             Log.d("Creating Tables: ", "DB Name - lumos.db");
-            db.execSQL("create table messages (_id integer primary key autoincrement, msg text, email text, email2 text, lat text, long text, at datetime default current_timestamp);");
+            db.execSQL("create table messages (_id integer primary key autoincrement, msg text, email text, email2 text, lat text, long text, read integer, at datetime default current_timestamp);");
             db.execSQL("create table profile (_id integer primary key autoincrement, name text, email text unique, count integer default 0);");
         }
 
