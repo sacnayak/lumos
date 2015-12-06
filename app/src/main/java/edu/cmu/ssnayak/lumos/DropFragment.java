@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -82,36 +83,27 @@ public class DropFragment extends Fragment implements LocationListener {
             String receiver = ((EditText) getView().findViewById(R.id.receiver)).getText().toString();
             String message = ((EditText) getView().findViewById(R.id.message)).getText().toString();
 
-            //Grab the selected location from the map
+            if(receiver.isEmpty()) {
+                Toast.makeText(getActivity().getApplicationContext(),"Please enter a receiver",Toast.LENGTH_SHORT).show();
+            } else if(message.isEmpty()) {
+                Toast.makeText(getActivity().getApplicationContext(),"Please enter a message",Toast.LENGTH_SHORT).show();
+            } else {
 
-            Location location = googleMap.getMyLocation();
-            String latitude = String.valueOf(location.getLatitude());
-            String longitude = String.valueOf(location.getLongitude());
-            Log.d("Receiver: ", receiver);
-            Log.d("Sending Message:", message);
-            Log.d("Tagged at Latitude: ", latitude);
-            Log.d("Tagged at Longitude: ", longitude);
-            //send the message to server -> GCM
-            send(tv.getText().toString(), receiver, latitude, longitude);
+                //Grab the selected location from the map
+                Location location = googleMap.getMyLocation();
+                String latitude = String.valueOf(location.getLatitude());
+                String longitude = String.valueOf(location.getLongitude());
+                Log.d("Receiver: ", receiver);
+                Log.d("Sending Message:", message);
+                Log.d("Tagged at Latitude: ", latitude);
+                Log.d("Tagged at Longitude: ", longitude);
+                //send the message to server -> GCM
+                send(tv.getText().toString(), receiver, latitude, longitude);
 
-            ((EditText) getView().findViewById(R.id.receiver)).setText(null);
-            ((EditText) getView().findViewById(R.id.message)).setText(null);
+                ((EditText) getView().findViewById(R.id.receiver)).setText(null);
+                ((EditText) getView().findViewById(R.id.message)).setText(null);
 
-            Cursor c = getActivity().getContentResolver().query(DataProvider.CONTENT_URI_MESSAGES, null, null, null, null);
-            while(c.moveToNext()) {
-                Log.d("Iterating over: ", "Messages from DB");
-                Log.d("From: ", " " + c.getString(c.getColumnIndex(DataProvider.COL_FROM)));
-                Log.d("To: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_TO)));
-                Log.d("Msg: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_MSG)));
-                Log.d("Lat: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_LAT)));
-                Log.d("Long: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_LONG)));
-                if(Commons.getPreferredEmail()==c.getString(c.getColumnIndex(DataProvider.COL_FROM))) {
-                    Log.d("Message from DB:", " " +c.getString(c.getColumnIndex(DataProvider.COL_MSG)));
-                }
-                c.move(1);
             }
-
-
         }
     };
 
@@ -122,20 +114,7 @@ public class DropFragment extends Fragment implements LocationListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Cursor c = getActivity().getContentResolver().query(DataProvider.CONTENT_URI_MESSAGES, null, null, null, null);
-        while(c.moveToNext()) {
-            Log.d("Iterating over: ", "Messages from DB");
-            Log.d("From: ", " " + c.getString(c.getColumnIndex(DataProvider.COL_FROM)));
-            Log.d("To: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_TO)));
-            Log.d("Msg: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_MSG)));
-            Log.d("Lat: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_LAT)));
-            Log.d("Long: ", " " +c.getString(c.getColumnIndex(DataProvider.COL_LONG)));
-            if(Commons.getPreferredEmail()==c.getString(c.getColumnIndex(DataProvider.COL_FROM))) {
-                Log.d("Message from DB:", " " +c.getString(c.getColumnIndex(DataProvider.COL_MSG)));
-            }
-            c.move(1);
-        }
-
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     }
 
     @Override
@@ -176,7 +155,8 @@ public class DropFragment extends Fragment implements LocationListener {
 
         // Instantiate the RequestQueue.
         queue = Volley.newRequestQueue(getActivity());
-
+        //hide soft keyboard
+        closeSoftKeyBoardAlways();
         return rootView;
     }
 
@@ -258,7 +238,7 @@ public class DropFragment extends Fragment implements LocationListener {
             if (view.getId() == R.id.searchLocation) {
                 if (dropMarker != null)
                     dropMarker.remove();
-                dropMarker = googleMap.addMarker(new MarkerOptions().title(place).position(latlng));
+                dropMarker = googleMap.addMarker(new MarkerOptions().title(place).position(latlng).draggable(true));
             }
         }
 
@@ -326,7 +306,7 @@ public class DropFragment extends Fragment implements LocationListener {
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
         LatLng latLng = new LatLng(latitude, longitude);
-
+        dropMarker = googleMap.addMarker(new MarkerOptions().title("Current Location").position(latLng).draggable(true));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
     }
