@@ -181,8 +181,8 @@ public class DropFragment extends Fragment implements LocationListener {
                 googleMap.setTrafficEnabled(true);
                 googleMap.setBuildingsEnabled(true);
                 LocationManager locationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
-                Criteria criteria = new Criteria();
-                String provider = locationManager.getBestProvider(criteria, true);
+
+                List<String> providers = locationManager.getProviders(true);
                 if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                         && ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     // TODO: Consider calling
@@ -194,10 +194,24 @@ public class DropFragment extends Fragment implements LocationListener {
                     // for Activity#requestPermissions for more details.
                     return;
                 }
-                Location location = locationManager.getLastKnownLocation(provider);
-                if (location != null) {
-                    onLocationChanged(location);
+
+                Location bestLocation = null;
+                for (String provider : providers) {
+                    Location l = locationManager.getLastKnownLocation(provider);
+                    if (l == null) {
+                        continue;
+                    }
+                    if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                        // Found best last known location: %s", l);
+                        bestLocation = l;
+                    }
                 }
+
+                if (bestLocation != null) {
+                    onLocationChanged(bestLocation);
+                }
+                Criteria criteria = new Criteria();
+                String provider = locationManager.getBestProvider(criteria, true);
                 locationManager.requestLocationUpdates(provider, 120000, 0, this);
 
             }
