@@ -4,6 +4,8 @@ import android.database.MatrixCursor;
 import android.provider.BaseColumns;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +13,23 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.cmu.ssnayak.lumos.data.MessageAdapter;
+import edu.cmu.ssnayak.lumos.model.Message;
+
 /**
  * A simple extension of the Fragment class. Holds the view for all the texts.
  *
  */
 public class MessageListFragment extends Fragment {
 
+    private RecyclerView messageListView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
     private SimpleCursorAdapter adapter;
-    ListView messageListView;
 
     /**
      * Use this factory method to create a new instance of
@@ -45,36 +56,26 @@ public class MessageListFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_message_list, container, false);
 
-        messageListView = (ListView) root.findViewById(R.id.messageListView);
+        messageListView = (RecyclerView) root.findViewById(R.id.message_list_view);
+        //since items are not dynamic for now, improves performance
+        messageListView.setHasFixedSize(true);
 
-        //FIXME
-        String[] columns = new String[] { "_id", "msg", "time" };
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        messageListView.setLayoutManager(mLayoutManager);
 
-        MatrixCursor matrixCursor= new MatrixCursor(columns);
-        getActivity().startManagingCursor(matrixCursor);
-        matrixCursor.addRow(new Object[]{1, "Hello there", "15:30"});
-        matrixCursor.addRow(new Object[]{2, "Hello there!", "15:31"});
-        matrixCursor.addRow(new Object[]{3, "Hello there!!", "15:32" });
-        String[] from = {BaseColumns._ID, "msg", "time"};
-        int[] to = {R.id.text1, R.id.text2};
-        //FIXME
-
-
-        adapter = new SimpleCursorAdapter(getActivity(),
-                R.layout.message_list_item,
-                matrixCursor,
-                from,
-                to,
-                0);
-        messageListView.setAdapter(adapter);
-        messageListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> a, View v, int i, long l) {
-                //TODO
-                //openConversation(names, i);
-            }
-        });
+        // specify an adapter (see also next example)
+        List<Message> messageList = new ArrayList<Message>();
+        messageList.add(new Message("Ajayan Subramanian", "Get my pendrive", "23.49", "-43.56" , "", true));
+        messageList.add(new Message("Ajayan Subramanian", "Get my pendrive", "23.49", "-43.56" , "", true));
+        messageList.add(new Message("Ajayan Subramanian", "Get my pendrive", "23.49", "-43.56" , "", true));
+        mAdapter = new MessageAdapter(getActivity(), messageList);
+        messageListView.setAdapter(mAdapter);
 
         return root;
     }
+
+
+
+
 }

@@ -6,6 +6,11 @@
     <string name="to">To:</string>
     <string name="message">Type your message here:</string>
 
+    <string name="TestName">Ajayan Subramanian</string>
+    <string name="TestLocation">300 S Craig St.</string>
+    <string name="TestMessage">Get chillies from Bombay Mart!</string>
+
+
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
