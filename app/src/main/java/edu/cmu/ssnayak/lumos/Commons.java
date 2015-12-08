@@ -1,7 +1,9 @@
 package edu.cmu.ssnayak.lumos;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -35,6 +37,14 @@ public class Commons extends Application {
     public static String[] email_arr;
 
     private static SharedPreferences prefs;
+
+    public static final Map<String, String> profileMap;
+    static
+    {
+        profileMap = new HashMap<String, String>();
+        profileMap.put("sachin.nayak101@gmail.com", "Sachin Nayak");
+        profileMap.put("ajayan.subramanian@gmail.com", "Ajayan Subramanian");
+    }
 
     @Override
     public void onCreate() {

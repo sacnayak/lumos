@@ -64,6 +64,7 @@ import edu.cmu.ssnayak.lumos.data.DataProvider;
  */
 public class DropFragment extends Fragment implements LocationListener {
 
+    private static final String TAG = "DropFragment";
     private RequestQueue queue;
     private SupportMapFragment mMapFragment;
     private GoogleMap googleMap;
@@ -73,7 +74,29 @@ public class DropFragment extends Fragment implements LocationListener {
     private Button sendMessageButton;
     private Marker dropMarker;
 
+    private GoogleMap.OnMarkerDragListener onMarkerDragListener = new GoogleMap.OnMarkerDragListener() {
 
+        @Override
+        public void onMarkerDragStart(Marker marker) {
+            // TODO Auto-generated method stub
+            Log.d(TAG, "onMarkerDragStart");
+        }
+
+        @Override
+        public void onMarkerDragEnd(Marker marker) {
+            // TODO Auto-generated method stub
+            Log.d(TAG, "onMarkerDragEnd");
+            //update marker object
+            dropMarker = marker;
+        }
+
+        @Override
+        public void onMarkerDrag(Marker marker) {
+            // TODO Auto-generated method stub
+            Log.d(TAG, "onMarkerDrag");
+        }
+
+    };
 
     private View.OnClickListener sendMessage = new View.OnClickListener() {
         public void onClick(View view) {
@@ -90,9 +113,10 @@ public class DropFragment extends Fragment implements LocationListener {
             } else {
 
                 //Grab the selected location from the map
-                Location location = googleMap.getMyLocation();
-                String latitude = String.valueOf(location.getLatitude());
-                String longitude = String.valueOf(location.getLongitude());
+                LatLng latLng = dropMarker.getPosition();
+
+                String latitude = String.valueOf(latLng.latitude);
+                String longitude = String.valueOf(latLng.longitude);
                 Log.d("Receiver: ", receiver);
                 Log.d("Sending Message:", message);
                 Log.d("Tagged at Latitude: ", latitude);
@@ -177,6 +201,7 @@ public class DropFragment extends Fragment implements LocationListener {
             googleMap = mMapFragment.getMap();
             // Check if we were successful in obtaining the map.
             if (googleMap != null) {
+                googleMap.setOnMarkerDragListener(onMarkerDragListener);
                 googleMap.setMyLocationEnabled(true);
                 googleMap.setTrafficEnabled(true);
                 googleMap.setBuildingsEnabled(true);
@@ -250,8 +275,9 @@ public class DropFragment extends Fragment implements LocationListener {
             googleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
 
             if (view.getId() == R.id.searchLocation) {
-                if (dropMarker != null)
+                if (dropMarker != null) {
                     dropMarker.remove();
+                }
                 dropMarker = googleMap.addMarker(new MarkerOptions().title(place).position(latlng).draggable(true));
             }
         }
@@ -320,7 +346,10 @@ public class DropFragment extends Fragment implements LocationListener {
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
         LatLng latLng = new LatLng(latitude, longitude);
-        dropMarker = googleMap.addMarker(new MarkerOptions().title("Current Location").position(latLng).draggable(true));
+        if (dropMarker != null) {
+            dropMarker.remove();
+        }
+        dropMarker = googleMap.addMarker(new MarkerOptions().position(latLng).draggable(true));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
     }
@@ -330,7 +359,7 @@ public class DropFragment extends Fragment implements LocationListener {
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
-                String msg = "";
+                String msg = "Your message has been sent";
                 try {
                     ServerUtilities.send(txt, profileEmail, lat, llong);
 

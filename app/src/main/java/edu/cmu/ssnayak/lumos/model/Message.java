@@ -1,7 +1,5 @@
 package edu.cmu.ssnayak.lumos.model;
 
-import android.location.Location;
-
 /**
  * Created by snayak on 12/7/15.
  */
@@ -14,9 +12,12 @@ public class Message {
     private String srcImage;
     private boolean isRead;
 
-    public Message(String senderName, String msgText, String mLat, String mLong, String srcImage, boolean isRead) {
+    private String senderId;
+
+    public Message(String senderId, String senderName, String msgText, String mLat, String mLong, String srcImage, boolean isRead) {
+        this.senderId = senderId;
         this.senderName = senderName;
-        this.msgText = senderName;
+        this.msgText = msgText;
         this.mLat = mLat;
         this.mLong = mLong;
         this.srcImage = srcImage;
@@ -70,5 +71,13 @@ public class Message {
 
     public void setmLong(String mLong) {
         this.mLong = mLong;
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 }

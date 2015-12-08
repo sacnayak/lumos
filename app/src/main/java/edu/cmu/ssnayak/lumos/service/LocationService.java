@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.location.Location;
@@ -24,7 +25,9 @@ import com.google.android.gms.location.LocationServices;
 import java.text.DateFormat;
 import java.util.Date;
 
+import edu.cmu.ssnayak.lumos.Commons;
 import edu.cmu.ssnayak.lumos.MainActivity;
+import edu.cmu.ssnayak.lumos.MessageActivity;
 import edu.cmu.ssnayak.lumos.R;
 import edu.cmu.ssnayak.lumos.data.DataProvider;
 
@@ -154,19 +157,29 @@ public class LocationService extends Service implements LocationListener,
     private void publishMessage(Cursor cursor) {
         // prepare intent which is triggered if the
         // notification is selected
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, MessageActivity.class);
+        intent.putExtra("ChatId", cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM)));
+        intent.putExtra("MsgID", cursor.getString(cursor.getColumnIndex(DataProvider.COL_ID)));
+
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         // build notification
         // the addAction re-use the same intent to keep the example short
         Notification notification  = new Notification.Builder(this)
-                .setContentTitle(cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM)))
+                .setContentTitle(Commons.profileMap.get(cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM))))
                 .setContentText(cursor.getString(cursor.getColumnIndex(DataProvider.COL_MSG)))
                 .setSmallIcon(R.drawable.ic_plusone_standard_off_client)
                 .setContentIntent(pIntent)
                 .setAutoCancel(true)
                 .build();
 
+        String _id = cursor.getString(cursor.getColumnIndex(DataProvider.COL_ID));
+        //update DB as read
+        ContentValues values = new ContentValues(2);
+        values.put(DataProvider.COL_ID, _id);
+        values.put(DataProvider.COL_READ, 1);
+
+        getContentResolver().update(DataProvider.CONTENT_URI_MESSAGES, values, DataProvider.COL_ID+"=?",new String[] {String.valueOf(_id)});
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

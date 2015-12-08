@@ -1,5 +1,6 @@
 package edu.cmu.ssnayak.lumos;
 
+import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.provider.BaseColumns;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,8 @@ import android.widget.SimpleCursorAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.cmu.ssnayak.lumos.client.Constants;
+import edu.cmu.ssnayak.lumos.data.DataProvider;
 import edu.cmu.ssnayak.lumos.data.MessageAdapter;
 import edu.cmu.ssnayak.lumos.model.Message;
 
@@ -66,15 +69,29 @@ public class MessageListFragment extends Fragment {
 
         // specify an adapter (see also next example)
         List<Message> messageList = new ArrayList<Message>();
-        messageList.add(new Message("Ajayan Subramanian", "Get my pendrive", "23.49", "-43.56" , "", true));
-        messageList.add(new Message("Ajayan Subramanian", "Get my pendrive", "23.49", "-43.56" , "", true));
-        messageList.add(new Message("Ajayan Subramanian", "Get my pendrive", "23.49", "-43.56" , "", true));
+        populateMessageList(messageList);
+
         mAdapter = new MessageAdapter(getActivity(), messageList);
         messageListView.setAdapter(mAdapter);
 
         return root;
     }
 
+    private void populateMessageList(List<Message> messageList) {
+        Cursor c = getActivity().getContentResolver().query(DataProvider.CONTENT_URI_MESSAGES, null, null, null, null);
+        while(c.moveToNext()) {
+            //check if messages table has messages which are unread
+            if(c.getInt(c.getColumnIndex(DataProvider.COL_READ)) == 0) {
+                String from = c.getString(c.getColumnIndex(DataProvider.COL_FROM));
+                String msgtxt = c.getString(c.getColumnIndex(DataProvider.COL_MSG));
+                String lat = c.getString(c.getColumnIndex(DataProvider.COL_LAT));
+                String llong = c.getString(c.getColumnIndex(DataProvider.COL_LONG));
+                Message message = new Message(from, Commons.profileMap.get(from), msgtxt,lat, llong, "", true);
+                messageList.add(message);
+            }
+            c.move(1);
+        }
+    }
 
 
 

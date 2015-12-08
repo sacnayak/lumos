@@ -6,13 +6,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.Iterator;
 import java.util.List;
 
-import edu.cmu.ssnayak.lumos.MainActivity;
+
 import edu.cmu.ssnayak.lumos.MessageActivity;
 import edu.cmu.ssnayak.lumos.R;
 import edu.cmu.ssnayak.lumos.model.Message;
@@ -50,14 +49,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         Message message = messageList.get(position);
 
         TextView nameTextView = viewHolder.nameTextView;
-        nameTextView.setText(message.getMsgText());
+        nameTextView.setText(message.getSenderName());
 
         TextView locationTextView = viewHolder.locationTextView;
-        nameTextView.setText(message.getmLat() + "," + message.getmLong());
+        locationTextView.setText(message.getMsgText());
 
-        ImageView contactImage = viewHolder.imageContact;
-        //FIXME
-        contactImage.setImageDrawable(context.getResources().getDrawable(R.drawable.common_plus_signin_btn_icon_dark));
+        viewHolder.chatID = message.getSenderName();
+
+        //ImageView contactImage = viewHolder.imageContact;
+        //FIXME Hardcoded image
+        //contactImage.setImageDrawable(context.getResources().);
 
     }
 
@@ -83,7 +84,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         // for any view that will be set as you render a row
         public TextView nameTextView;
         public TextView locationTextView;
-        public ImageView imageContact;
+        public String chatID;
 
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
@@ -94,7 +95,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
             nameTextView = (TextView) itemView.findViewById(R.id.senderName);
             locationTextView = (TextView) itemView.findViewById(R.id.senderDropLocation);
-            imageContact = (ImageView) itemView.findViewById(R.id.senderImage);
 
             //setting up the onclicklistener
             itemView.setOnClickListener(this);
@@ -103,7 +103,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         @Override
         public void onClick(View v) {
             Intent intent= new Intent(context, MessageActivity.class);
-            intent.putExtra("ChatId", "Chat");
+            intent.putExtra("ChatId", this.chatID);
             context.startActivity(intent);
         }
 
