@@ -5,7 +5,6 @@ import android.Manifest;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -61,19 +60,41 @@ import edu.cmu.ssnayak.lumos.data.DataProvider;
 
 /**
  * Created by snayak on 12/1/15.
+ * The fragment in the view pager that enables sending of messages based
+ * on a location
+ * @author snayak
  */
 public class DropFragment extends Fragment implements LocationListener {
 
     private static final String TAG = "DropFragment";
+
+    //HTTP request queue specific to volley library
     private RequestQueue queue;
+
+    //Map fragment for the view
     private SupportMapFragment mMapFragment;
+    //instance of GoogleMap
     private GoogleMap googleMap;
+
+    //handler for background location request processing
     private Handler handler;
+
+    //suggestion list for the location
     private ArrayList<String> mSuggestions = new ArrayList<String>();
+
+    //Android widget for the autocomplete text view on the map fragment
+    //which suggests location
     private AutoCompleteTextView searchLocationAutocomplete;
+
+    //the send message button
     private Button sendMessageButton;
+
+    //the map marker
     private Marker dropMarker;
 
+    /**
+     * update local instance of dropMarker if dragged
+     */
     private GoogleMap.OnMarkerDragListener onMarkerDragListener = new GoogleMap.OnMarkerDragListener() {
 
         @Override
@@ -98,6 +119,10 @@ public class DropFragment extends Fragment implements LocationListener {
 
     };
 
+    /**
+     * On click listener for the send message button
+     * Triggers sending a message to GCM
+     */
     private View.OnClickListener sendMessage = new View.OnClickListener() {
         public void onClick(View view) {
             Button btn = (Button) view;
@@ -106,6 +131,7 @@ public class DropFragment extends Fragment implements LocationListener {
             String receiver = ((EditText) getView().findViewById(R.id.receiver)).getText().toString();
             String message = ((EditText) getView().findViewById(R.id.message)).getText().toString();
 
+            //basic error handling
             if(receiver.isEmpty()) {
                 Toast.makeText(getActivity().getApplicationContext(),"Please enter a receiver",Toast.LENGTH_SHORT).show();
             } else if(message.isEmpty()) {
@@ -124,6 +150,7 @@ public class DropFragment extends Fragment implements LocationListener {
                 //send the message to server -> GCM
                 send(tv.getText().toString(), receiver, latitude, longitude);
 
+                //clear the views
                 ((EditText) getView().findViewById(R.id.receiver)).setText(null);
                 ((EditText) getView().findViewById(R.id.message)).setText(null);
 
@@ -138,6 +165,7 @@ public class DropFragment extends Fragment implements LocationListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //so that the EditText Views are visible when the keyboard slides up
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     }
 
@@ -243,6 +271,9 @@ public class DropFragment extends Fragment implements LocationListener {
         }
     }
 
+    /**
+     * Hide the SoftKeyboard
+     */
     public void closeSoftKeyBoardAlways() {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Service.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow((null == getActivity().getCurrentFocus()) ? null : getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
@@ -341,6 +372,11 @@ public class DropFragment extends Fragment implements LocationListener {
         queue.add(stringRequest);
     }
 
+    /**
+     * The Fragment implements LocationListener. We need to follow the user
+     * as he moves around. Custom implementation.
+     * @param location
+     */
     @Override
     public void onLocationChanged(Location location) {
         double latitude = location.getLatitude();
@@ -354,6 +390,13 @@ public class DropFragment extends Fragment implements LocationListener {
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
     }
 
+    /**
+     * Send a message in a background thread. Make Toast if fail, success.
+     * @param txt
+     * @param profileEmail
+     * @param lat
+     * @param llong
+     */
     private void send(final String txt, final String profileEmail, final String lat, final String llong) {
         Log.d("Message sent is: " , txt);
         new AsyncTask<Void, Void, String>() {
@@ -373,6 +416,7 @@ public class DropFragment extends Fragment implements LocationListener {
                     //in a real scenario the sender would get an acknowledgement
                     values.put(DataProvider.COL_READ, 0);
 
+                    //update sent message to local databse
                     getActivity().getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
 
                 } catch (IOException ex) {
@@ -384,6 +428,7 @@ public class DropFragment extends Fragment implements LocationListener {
             @Override
             protected void onPostExecute(String msg) {
                 if (!TextUtils.isEmpty(msg)) {
+                    //Feedback toast
                     Toast.makeText(getActivity().getApplicationContext(), msg, Toast.LENGTH_LONG).show();
                 }
             }

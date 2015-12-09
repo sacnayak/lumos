@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -27,12 +25,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.cmu.ssnayak.lumos.data.ChatAdapter;
 import edu.cmu.ssnayak.lumos.data.DataProvider;
 import edu.cmu.ssnayak.lumos.model.Message;
 
 /**
  * Created by snayak on 12/7/15.
+ * Activity to display conversation between two people. Map on to activity_message.xml layout
+ * Shows a map with multiple markers indicating various messages left at many locations between
+ * you and the other user.
+ * Blue marker are the ones user received
+ * Red markers are the ones user sent
+ * Yellow is the highlighted marker - either latest, or user clicked on it.
  */
 public class MessageActivity extends AppCompatActivity implements GoogleMap.OnMarkerClickListener {
 
@@ -43,15 +46,22 @@ public class MessageActivity extends AppCompatActivity implements GoogleMap.OnMa
 //    private RecyclerView.Adapter mAdapter;
 //    private RecyclerView.LayoutManager mLayoutManager;
 
+    //Required for display of Google Map Fragments
     private SupportMapFragment mMapFragment;
     private GoogleMap googleMap;
 
+    //the conversation id or the email id of the sender
     private String chatID;
+    //The row id in the table for which the message notification popped out
     private String notificationMsgId;
-
+    //list of markers to be displayed on the UI
     List<Marker> dropMarkers;
+    //a map of table row_id vs message object for this conversation
+    //maintained for easy access
     Map<String, Message> messageMap;
 
+    //displaying a yellow marker for the latest message OR
+    //the clicked marker-message
     private String activeMessageId;
 
     @Override
@@ -81,7 +91,7 @@ public class MessageActivity extends AppCompatActivity implements GoogleMap.OnMa
         initializeMap();
 
         //quick hack to display latest message
-        getActiveMessageId();
+        setActiveMessageId();
 
         List<Message> displayMessage = new ArrayList<Message>();
         //displayMessage.add(messageMap.get(this.activeMessageId));
@@ -95,7 +105,12 @@ public class MessageActivity extends AppCompatActivity implements GoogleMap.OnMa
         senderMessage.setText(messageMap.get(this.activeMessageId).getMsgText());
     }
 
-    private void getActiveMessageId() {
+    /**
+     * Logic for setting the message to be highlighted on the map
+     * If redirected from android notification, or if clicked by user,
+     * or just the latest message
+     */
+    private void setActiveMessageId() {
         if(this.notificationMsgId != null) {
             activeMessageId = this.notificationMsgId;
             //clear notificationMsgId
@@ -119,6 +134,11 @@ public class MessageActivity extends AppCompatActivity implements GoogleMap.OnMa
         return;
     }
 
+    /**
+     * Logic to color the active marker to yellow (based on activeMessageId)
+     * and pan the map camera to desired location
+     * @param msgId
+     */
     private void setActiveMarker(String msgId) {
         for(Marker marker : dropMarkers) {
             if(msgId.equalsIgnoreCase(marker.getSnippet())) {
@@ -134,6 +154,9 @@ public class MessageActivity extends AppCompatActivity implements GoogleMap.OnMa
         }
     }
 
+    /**
+     * Query the DB to fetch relevant messages for this conversation
+     */
     private void populateMessageMap() {
         //initialize or re-initialize messageMap
         messageMap = new HashMap<String, Message>();
@@ -163,6 +186,10 @@ public class MessageActivity extends AppCompatActivity implements GoogleMap.OnMa
         }
     }
 
+    /**
+     * Initialize the map to be shown and place all the
+     * markers appropriately
+     */
     private void initializeMap() {
         // Try to obtain the map from the SupportMapFragment.
         googleMap = mMapFragment.getMap();
@@ -192,6 +219,11 @@ public class MessageActivity extends AppCompatActivity implements GoogleMap.OnMa
         }
     }
 
+    /**
+     * Back navigation
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -205,6 +237,12 @@ public class MessageActivity extends AppCompatActivity implements GoogleMap.OnMa
         }
     }
 
+    /**
+     * Incase the user clicks on a custom marker, switch colors
+     * and display the associated message below.
+     * @param marker
+     * @return
+     */
     @Override
     public boolean onMarkerClick(Marker marker) {
         String msgId = marker.getSnippet();
@@ -231,6 +269,11 @@ public class MessageActivity extends AppCompatActivity implements GoogleMap.OnMa
         return true;
     }
 
+    /**
+     * utility function to swap between active marker
+     * and clicked marker
+     * @param msgId
+     */
     private void swapActiveMarkers(String msgId) {
         //reset active marker
         for(Marker marker : dropMarkers) {

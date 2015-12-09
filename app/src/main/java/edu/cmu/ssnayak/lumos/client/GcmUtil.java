@@ -16,6 +16,9 @@ import java.util.Random;
 
 import edu.cmu.ssnayak.lumos.Commons;
 
+/**
+ * Utility class provided by Google to work with GCM registration
+ */
 public class GcmUtil {
 	
 	private static final String TAG = "GcmUtil";
@@ -182,12 +185,5 @@ public class GcmUtil {
         intent.putExtra(Commons.EXTRA_STATUS, status ? Commons.STATUS_SUCCESS : Commons.STATUS_FAILED);
         ctx.sendBroadcast(intent);		
 	}
-	
-	public void cleanup() {
-		gcm.close();
-		ctx = null;
-		prefs = null;
-		gcm = null;
-	}	
 	
 }

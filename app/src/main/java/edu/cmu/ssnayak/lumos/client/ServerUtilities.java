@@ -31,7 +31,8 @@ import edu.cmu.ssnayak.lumos.Commons;
 
 
 /**
- * Helper class used to communicate with the demo server.
+ * Helper class provided by google
+ * used to communicate with the GCM App server.
  */
 public final class ServerUtilities {
 	

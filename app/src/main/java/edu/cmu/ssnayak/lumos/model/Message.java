@@ -3,12 +3,14 @@ package edu.cmu.ssnayak.lumos.model;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
 
 /**
  * Created by snayak on 12/7/15.
+ * Model class to hold message details. To be used by MessageAdapter
+ * and MessageActivity to render messages
+ * @author snayak
  */
 public class Message {
 

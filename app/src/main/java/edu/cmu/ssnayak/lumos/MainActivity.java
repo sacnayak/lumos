@@ -18,12 +18,17 @@ import java.util.List;
 import edu.cmu.ssnayak.lumos.client.GcmUtil;
 import edu.cmu.ssnayak.lumos.service.LocationService;
 
+/**
+ * The MainActivity of the Application. Hosts the two fragments and the
+ * ViewPager Tab view
+ */
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
+    //Register the app with the server
     private GcmUtil gcmUtil;
 
     @Override
@@ -45,10 +50,14 @@ public class MainActivity extends AppCompatActivity {
 
         gcmUtil = new GcmUtil(getApplicationContext());
 
-        //Start service
+        //Start background service onCreate
         startService(new Intent(this, LocationService.class));
     }
 
+    /**
+     * Set up the View Pager with the two fragments
+     * @param viewPager
+     */
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new DropFragment(), "Drop");
@@ -79,7 +88,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+    /**
+     * Custom implemtation of FragmentPagerAdapter in order to create tabbed
+     * views between fragments
+     */
     private class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();

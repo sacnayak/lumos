@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 /**
- * Created by snayak on 11/29/15.
+ * Customized Content Provider class for messaging
  */
 public class DataProvider extends ContentProvider {
 
@@ -185,8 +185,10 @@ public class DataProvider extends ContentProvider {
         return null;
     }
 
-    //--------------------------------------------------------------------------
 
+    /**
+     * The SQLite Helper class
+     */
     private static class DbHelper extends SQLiteOpenHelper {
 
         private static final String DATABASE_NAME = "lumos.db";
@@ -200,7 +202,7 @@ public class DataProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             Log.d("Creating Tables: ", "DB Name - lumos.db");
             db.execSQL("create table messages (_id integer primary key autoincrement, msg text, email text, email2 text, lat text, long text, read integer, at datetime default current_timestamp);");
-            db.execSQL("create table profile (_id integer primary key autoincrement, name text, email text unique, count integer default 0);");
+            db.execSQL("create table profile (_id integer primary key autoincrement, name text, email text unique);");
         }
 
         @Override

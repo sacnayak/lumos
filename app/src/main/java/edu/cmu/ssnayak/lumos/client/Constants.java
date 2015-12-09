@@ -1,13 +1,14 @@
 package edu.cmu.ssnayak.lumos.client;
 
-
-import java.util.HashMap;
-import java.util.Map;
-
+/**
+ * Consists of constants to be used throughout the app, in order
+ * to interface with Google Cloud Messaging
+ * @author snayak
+ */
 public interface Constants {
 
     /**
-     * Base URL of the Demo Server (such as http://my_host:8080/gcm-demo)
+     * Base URL of the Demo Server which forwards message to GCM
      */
 	public String SERVER_URL = "http://lumos-server-1149.appspot.com";
 

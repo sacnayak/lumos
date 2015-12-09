@@ -11,8 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,8 +21,10 @@ import edu.cmu.ssnayak.lumos.data.MessageAdapter;
 import edu.cmu.ssnayak.lumos.model.Message;
 
 /**
- * A simple extension of the Fragment class. Holds the view for all the texts.
- *
+ * A simple extension of the Fragment class. Holds the view for all the messages
+ * received. This is implemented using a RecyclerView (LinearLayoutManager)
+ * Adapter for the view is DataProvider
+ * @author snayak
  */
 public class MessageListFragment extends Fragment {
 
@@ -32,6 +32,7 @@ public class MessageListFragment extends Fragment {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    //email id vs list of message map
     HashMap<String, List<Message>> messageMap;
 
     /**
@@ -54,6 +55,13 @@ public class MessageListFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Operations to be done on Create of Fragment
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -66,18 +74,25 @@ public class MessageListFragment extends Fragment {
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getActivity());
         messageListView.setLayoutManager(mLayoutManager);
-
-        // specify an adapter (see also next example)
-
+        //create email vs messagelist map from db
         populateMessageList();
+        //done such that only the latest message is displayed in the screen
         List<Message> displayMessageList = new ArrayList<Message>();
         populateDisplayMessageList(displayMessageList);
+
+        //instantiate the adapter for the recycler view
         mAdapter = new MessageAdapter(getActivity(), displayMessageList);
+        //associate adapter to view
         messageListView.setAdapter(mAdapter);
 
         return root;
     }
 
+    /**
+     * ensures that only the latest message is dispalyed for each
+     * conversation
+     * @param displayMessageList
+     */
     private void populateDisplayMessageList(List<Message> displayMessageList) {
         for (String key : this.messageMap.keySet()) {
             List<Message> messages = messageMap.get(key);
@@ -86,6 +101,10 @@ public class MessageListFragment extends Fragment {
         }
     }
 
+    /**
+     * From the DB, creates a email id vs message list map
+     * of all readable messages (messages that have been received)
+     */
     private void populateMessageList() {
         //initialize or re-initialize messageMap
         messageMap = new HashMap<String, List<Message>>();
@@ -108,12 +127,14 @@ public class MessageListFragment extends Fragment {
                     //if there already is a message in this location
                     List<Message> messageList = messageMap.get(from);
                     messageList.add(message);
+                    //sort in descending order such that the latest message is on top of the list
                     Collections.sort(messageList, new Commons.MessageComparator());
                     messageMap.put(from, messageList);
                 } else {
                     //if there is no message in this location
                     List<Message> messageList = new ArrayList<Message>();
                     messageList.add(message);
+                    //sort in descending order such that the latest message is on top of the list
                     Collections.sort(messageList, new Commons.MessageComparator());
                     messageMap.put(from, messageList);
                 }

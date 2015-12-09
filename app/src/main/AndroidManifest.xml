@@ -18,7 +18,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <!--The Individual Message Chat Activity (between two people)-->
         <activity
             android:name=".MessageActivity">
             <meta-data
@@ -26,18 +26,21 @@
                 android:value="edu.cmu.ssnayak.lumos.MainActivity" />
         </activity>
 
+        <!-- Required Configuration to integrate with Google Play Services-->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCPlxkR74t3eAwL0bL8HLDQM4qARZXH-2w"/>
+
         <!--Content Provider Interface-->
         <provider
             android:name=".data.DataProvider"
             android:authorities="edu.cmu.ssnayak.lumos.provider"
             android:exported="false" >
         </provider>
+
         <!-- The GCM Broadcast Receiver-->
         <receiver
             android:name=".client.GcmBroadcastReceiver"
@@ -47,17 +50,19 @@
                 <category android:name="edu.cmu.ssnayak.lumos" />
             </intent-filter>
         </receiver>
-        <!-- The location service -->
+
+        <!-- The location service running in the background -->
         <service
             android:name=".service.LocationService"
             android:label="LocationService" >
         </service>
     </application>
 
-    <!--Location user permission for maps-->
+    <!--Location user permission for maps and the service-->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <!--Permission for GCM cloud to device messaging -->
     <permission
         android:name="edu.cmu.ssnayak.lumos.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
@@ -69,9 +74,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-
-
+    <!-- Open GL required for maps-->
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true"/>

@@ -18,18 +18,29 @@ import edu.cmu.ssnayak.lumos.model.Message;
 
 /**
  * Created by snayak on 12/7/15.
+ * Adapter class for the Inbox RecyclerView
  */
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
     private Context context;
     private List<Message> messageList;
 
+    /**
+     * Parameterized constructor for the adapter
+     * @param context
+     * @param messageList
+     */
     public MessageAdapter(Context context, List<Message> messageList) {
         this.messageList = messageList;
         this.context = context;
     }
 
-    // Usually involves inflating a layout from XML and returning the holder
+    /**
+     * Inflating a layout from XML and returning the holder
+     * @param parent
+     * @param viewType
+     * @return
+     */
     @Override
     public MessageAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
@@ -43,6 +54,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         return viewHolder;
     }
 
+    /**
+     * Binding the custom view holder to the adapter
+     * @param viewHolder
+     * @param position
+     */
     @Override
     public void onBindViewHolder(MessageAdapter.ViewHolder viewHolder, int position) {
 
@@ -57,14 +73,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         viewHolder.chatID = message.getSenderId();
 
         //ImageView contactImage = viewHolder.imageContact;
-        //FIXME Hardcoded image
+        //FIXME Hardcoded image in layout for contact
         //contactImage.setImageDrawable(context.getResources().);
 
     }
 
-    // Return the total count of messages (that are marked 'isRead')
+
+    /**
+     * Returns count of number of items to the RecyclerView
+     * In this case it would be the number of messages that are
+     * marked 'read'
+     * @return
+     */
     @Override
     public int getItemCount() {
+        // Return the total count of messages (that are marked 'isRead')
         int count = 0;
 
         Iterator<Message> messageIterator = this.messageList.iterator();
@@ -77,8 +100,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         return count;
     }
 
-    // Provide a direct reference to each of the views within a data item
-    // Used to cache the views within the item layout for fast access
+
+
+    /**
+     * Provide a direct reference to each of the views within a data item
+     * Used to cache the views within the item layout for fast access
+     */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
@@ -96,10 +123,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             nameTextView = (TextView) itemView.findViewById(R.id.senderName);
             locationTextView = (TextView) itemView.findViewById(R.id.senderDropLocation);
 
-            //setting up the onclicklistener
+            //setting up the onclicklistener to start MessageActivity
             itemView.setOnClickListener(this);
         }
 
+        /**
+         * Launch MessageActivity onClick of RecyclerView Item
+         * Send in chatID to help identifying messages to display
+         * @param v
+         */
         @Override
         public void onClick(View v) {
             Intent intent= new Intent(context, MessageActivity.class);

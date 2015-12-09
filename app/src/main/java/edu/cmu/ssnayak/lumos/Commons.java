@@ -17,7 +17,8 @@ import edu.cmu.ssnayak.lumos.client.Constants;
 import edu.cmu.ssnayak.lumos.model.Message;
 
 /**
- *
+ * Common single instance Application class with util methods
+ * to fetch primary user account
  */
 public class Commons extends Application {
 
@@ -95,6 +96,9 @@ public class Commons extends Application {
         return prefs.getString("sender_id_pref", Constants.SENDER_ID);
     }
 
+    /**
+     * Allowes for sorting of Message.java in descending order
+     */
     static class MessageComparator implements Comparator<Message>
     {
         public int compare(Message m1, Message m2) {
