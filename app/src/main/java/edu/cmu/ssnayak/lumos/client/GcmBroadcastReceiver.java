@@ -52,12 +52,14 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
                 String llong = intent.getStringExtra(DataProvider.COL_LONG);
                 Log.d("Msg", msg);
                 Log.d("From", email);
+                Log.d("To", Commons.getPreferredEmail());
                 Log.d("lat", lat);
                 Log.d("long", llong);
 
-                ContentValues values = new ContentValues(5);
+                ContentValues values = new ContentValues(6);
 				values.put(DataProvider.COL_MSG, msg);
 				values.put(DataProvider.COL_FROM, email);
+				values.put(DataProvider.COL_TO, Commons.getPreferredEmail());
                 values.put(DataProvider.COL_LAT, lat);
                 values.put(DataProvider.COL_LONG, llong);
                 values.put(DataProvider.COL_READ, 0);//default unread

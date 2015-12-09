@@ -28,7 +28,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         this.context = context;
     }
 
-
+    public void swap(List<Message> newMessageList) {
+        messageList.clear();
+        messageList.addAll(newMessageList);
+    }
 
     @Override
     public ChatAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -50,8 +53,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         TextView nameTextView = viewHolder.messageTextView;
         nameTextView.setText(message.getMsgText());
 
-        TextView locationTextView = viewHolder.locationTextView;
-        nameTextView.setText(message.getmLat() + "," + message.getmLong());
+        TextView senderTextView = viewHolder.senderTextView;
+        senderTextView.setText(message.getSenderName());
     }
 
     @Override
@@ -73,7 +76,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
-        public TextView locationTextView;
+        public TextView senderTextView;
         public TextView messageTextView;
 
         // We also create a constructor that accepts the entire item row
@@ -83,7 +86,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             // to access the context from any ViewHolder instance.
             super(itemView);
 
-            locationTextView = (TextView) itemView.findViewById(R.id.senderLocation);
+            senderTextView = (TextView) itemView.findViewById(R.id.senderName);
             messageTextView = (TextView) itemView.findViewById(R.id.senderMessage);
         }
     }

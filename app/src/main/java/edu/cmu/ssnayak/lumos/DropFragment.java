@@ -363,7 +363,7 @@ public class DropFragment extends Fragment implements LocationListener {
                 try {
                     ServerUtilities.send(txt, profileEmail, lat, llong);
 
-                    ContentValues values = new ContentValues(5);
+                    ContentValues values = new ContentValues(6);
                     values.put(DataProvider.COL_MSG, txt);
                     values.put(DataProvider.COL_TO, profileEmail);
                     values.put(DataProvider.COL_FROM, Commons.getPreferredEmail());

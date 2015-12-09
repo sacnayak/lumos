@@ -54,7 +54,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         TextView locationTextView = viewHolder.locationTextView;
         locationTextView.setText(message.getMsgText());
 
-        viewHolder.chatID = message.getSenderName();
+        viewHolder.chatID = message.getSenderId();
 
         //ImageView contactImage = viewHolder.imageContact;
         //FIXME Hardcoded image

@@ -129,7 +129,8 @@ public class LocationService extends Service implements LocationListener,
         Cursor c = getContentResolver().query(DataProvider.CONTENT_URI_MESSAGES, null, null, null, null);
         while(c.moveToNext()) {
             //check if messages table has messages which are unread
-            if(c.getInt(c.getColumnIndex(DataProvider.COL_READ)) == 0 && inVicinity(c)) {
+            if((c.getInt(c.getColumnIndex(DataProvider.COL_READ)) == 0) && inVicinity(c) &&
+                    (c.getString(c.getColumnIndex(DataProvider.COL_TO)).equalsIgnoreCase(Commons.getPreferredEmail()))) {
                 publishMessage(c);
             }
             c.move(1);
@@ -147,11 +148,15 @@ public class LocationService extends Service implements LocationListener,
         location.setLongitude(messageLongitude);
 
         float distance = mCurrentLocation.distanceTo(location);
+        boolean inVicinity = false;
         if(distance < ACCURACY) {
-            return true;
+            inVicinity = true;
+            Log.d(TAG, "inVicinity");
         }
-
-        return false;
+        if(!inVicinity) {
+            Log.d(TAG, "notInVicinity");
+        }
+        return inVicinity;
     }
 
     private void publishMessage(Cursor cursor) {

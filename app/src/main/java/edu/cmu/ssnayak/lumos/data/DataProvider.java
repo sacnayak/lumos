@@ -30,6 +30,7 @@ public class DataProvider extends ContentProvider {
     public static final String COL_LAT = "lat";
     public static final String COL_LONG = "long";
     public static final String COL_READ = "read";
+    public static final String COL_TIME = "at";
 
 
     public static final String TABLE_PROFILE = "profile";

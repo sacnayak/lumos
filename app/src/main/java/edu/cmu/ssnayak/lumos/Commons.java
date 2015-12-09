@@ -1,6 +1,7 @@
 package edu.cmu.ssnayak.lumos;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.util.Patterns;
 
 import edu.cmu.ssnayak.lumos.client.Constants;
+import edu.cmu.ssnayak.lumos.model.Message;
 
 /**
  *
@@ -44,6 +46,7 @@ public class Commons extends Application {
         profileMap = new HashMap<String, String>();
         profileMap.put("sachin.nayak101@gmail.com", "Sachin Nayak");
         profileMap.put("ajayan.subramanian@gmail.com", "Ajayan Subramanian");
+        profileMap.put("samarth7b@gmail.com", "Samarth Bahuguna");
     }
 
     @Override
@@ -90,6 +93,13 @@ public class Commons extends Application {
 
     public static String getSenderId() {
         return prefs.getString("sender_id_pref", Constants.SENDER_ID);
+    }
+
+    static class MessageComparator implements Comparator<Message>
+    {
+        public int compare(Message m1, Message m2) {
+            return m2.getmDateTime().compareTo(m1.getmDateTime());
+        }
     }
 
 }
